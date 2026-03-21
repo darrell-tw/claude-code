@@ -1,0 +1,15 @@
+{
+  "name": "darrell-tw-plugins",
+  "owner": {
+    "name": "Darrell Wang",
+    "email": "info@darrelltw.com"
+  },
+  "plugins": [
+    {
+      "name": "line",
+      "description": "LINE channel for Claude Code — messaging bridge with access control, Flex Message support, and quota tracking.",
+      "source": "./plugins/line",
+      "category": "messaging"
+    }
+  ]
+}
