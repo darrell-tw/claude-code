@@ -1,11 +1,11 @@
-# darrell-tw-plugins
+# darrell-tw/claude-code
 
 Claude Code plugin marketplace by Darrell Wang.
 
 ## Install
 
 ```
-/plugin marketplace add darrell-tw/claude-channels-line
+/plugin marketplace add darrell-tw/claude-code
 /plugin install line
 ```
 
