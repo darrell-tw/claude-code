@@ -109,12 +109,13 @@ Parse `$ARGUMENTS` (space-separated). If empty or unrecognized, show status.
 ### `set <key> <value>`
 
 Delivery/UX config. Supported keys: `ackReaction`, `replyToMode`,
-`textChunkLimit`, `chunkMode`, `mentionPatterns`. Validate types:
+`textChunkLimit`, `chunkMode`, `mentionPatterns`, `replyFormat`. Validate types:
 - `ackReaction`: string (emoji) or `""` to disable
 - `replyToMode`: `off` | `first` | `all`
 - `textChunkLimit`: number
 - `chunkMode`: `length` | `newline`
 - `mentionPatterns`: JSON array of regex strings
+- `replyFormat`: `text` | `flex` (default: `text`). When set to `flex`, Claude uses Flex Messages with structured bubble layout instead of plain text.
 
 Read, set the key, write, confirm.
 

@@ -76,6 +76,16 @@ ngrok http 8789
 /line:access policy allowlist
 ```
 
+## 返信フォーマット
+
+デフォルトはプレーンテキストで返信します。Flex Message（構造化レイアウト）を有効にするには:
+
+```
+/line:access set replyFormat flex
+```
+
+プレーンテキストに戻す: `/line:access set replyFormat text`
+
 ## ツール
 
 | ツール | 説明 |

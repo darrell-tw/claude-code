@@ -478,6 +478,8 @@ const mcp = new Server(
       '',
       'If the tag has image_path, file_path, video_path, or audio_path, Read that file — it is an attachment the sender sent.',
       '',
+      'Each message tag includes reply_format ("text" or "flex"). When "flex", use send_flex with structured bubble layout (see flex-reply skill). When "text", use reply for plain text. Users switch via /line:access set replyFormat flex.',
+      '',
       'send_flex builds Flex Messages — use for structured info like tables, cards, or rich layouts. Claude should compose the Flex JSON directly.',
       '',
       'send_image/send_video/send_audio/send_file send local files — they are staged to a public URL automatically via the outbox.',
@@ -1203,11 +1205,13 @@ async function handleEvent(event: LineEvent): Promise<void> {
   }
 
   let content = ''
+  const access = loadAccess()
   const meta: Record<string, string> = {
     chat_id: chatId,
     user: source.userId ?? '',
     user_id: source.userId ?? '',
     ts: new Date(event.timestamp).toISOString(),
+    reply_format: (access as Record<string, unknown>).replyFormat === 'flex' ? 'flex' : 'text',
   }
   if (event.replyToken) meta.reply_token = event.replyToken
 

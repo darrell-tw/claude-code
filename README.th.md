@@ -76,6 +76,16 @@ ngrok http 8789
 /line:access policy allowlist
 ```
 
+## รูปแบบการตอบกลับ
+
+ค่าเริ่มต้นคือข้อความธรรมดา เปิดใช้ Flex Message แบบมีโครงสร้าง:
+
+```
+/line:access set replyFormat flex
+```
+
+สลับกลับเป็นข้อความธรรมดา: `/line:access set replyFormat text`
+
 ## เครื่องมือ
 
 | เครื่องมือ | รายละเอียด |

@@ -76,6 +76,16 @@ ngrok http 8789
 /line:access policy allowlist
 ```
 
+## 回覆格式
+
+預設使用純文字回覆。啟用 Flex Message 結構化回覆：
+
+```
+/line:access set replyFormat flex
+```
+
+切回純文字：`/line:access set replyFormat text`
+
 ## 工具
 
 | 工具 | 說明 |

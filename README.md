@@ -73,6 +73,16 @@ Once everyone is paired:
 /line:access policy allowlist
 ```
 
+## Reply Format
+
+By default, the bot replies with plain text. To enable rich Flex Message replies:
+
+```
+/line:access set replyFormat flex
+```
+
+To switch back: `/line:access set replyFormat text`
+
 ## Tools
 
 | Tool | Description |
