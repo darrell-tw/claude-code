@@ -527,17 +527,67 @@ mcp.setNotificationHandler(
   async ({ params }) => {
     const { request_id, tool_name, description, input_preview } = params
     const access = loadAccess()
-    const text =
-      `🔐 Permission request [${request_id}]\n` +
-      `${tool_name}: ${description}\n` +
-      `${input_preview}\n\n` +
-      `Reply "yes ${request_id}" to allow or "no ${request_id}" to deny.`
+    // Truncate input_preview for Flex display (keep first 300 chars)
+    const preview = input_preview.length > 300
+      ? input_preview.slice(0, 300) + '…'
+      : input_preview
+    const flexMessage = {
+      type: 'flex' as const,
+      altText: `🔐 Permission request [${request_id}]: ${tool_name}`,
+      contents: {
+        type: 'bubble',
+        size: 'kilo',
+        header: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            { type: 'text', text: '🔐 Permission Request', weight: 'bold', size: 'md', color: '#1a1a1a' },
+            { type: 'text', text: `Code: ${request_id}`, size: 'xs', color: '#888888', margin: 'sm' },
+          ],
+          backgroundColor: '#f5f5f5',
+          paddingAll: '16px',
+        },
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            { type: 'text', text: tool_name, weight: 'bold', size: 'sm', color: '#333333' },
+            { type: 'text', text: description, size: 'xs', color: '#666666', wrap: true, margin: 'sm' },
+            { type: 'separator', margin: 'md' },
+            { type: 'text', text: preview, size: 'xxs', color: '#999999', wrap: true, margin: 'md' },
+          ],
+          paddingAll: '16px',
+        },
+        footer: {
+          type: 'box',
+          layout: 'horizontal',
+          spacing: 'md',
+          contents: [
+            {
+              type: 'button',
+              style: 'primary',
+              color: '#2d8c3c',
+              height: 'sm',
+              action: { type: 'postback', label: '✅ Allow', data: `perm:allow:${request_id}`, displayText: `yes ${request_id}` },
+            },
+            {
+              type: 'button',
+              style: 'primary',
+              color: '#cc3333',
+              height: 'sm',
+              action: { type: 'postback', label: '❌ Deny', data: `perm:deny:${request_id}`, displayText: `no ${request_id}` },
+            },
+          ],
+          paddingAll: '16px',
+        },
+      },
+    }
     for (const userId of access.allowFrom) {
       void (async () => {
         try {
           await lineAPI('POST', '/v2/bot/message/push', {
             to: userId,
-            messages: [{ type: 'text', text }],
+            messages: [flexMessage],
           })
         } catch (e) {
           process.stderr.write(`permission_request send to ${userId} failed: ${e}\n`)
@@ -1325,7 +1375,30 @@ async function handleEvent(event: LineEvent): Promise<void> {
         content = `(${msg.type} message)`
     }
   } else if (event.type === 'postback') {
-    content = `(postback: ${event.postback?.data ?? ''})`
+    // Intercept permission postback buttons (perm:allow:<id> / perm:deny:<id>)
+    const pbData = event.postback?.data ?? ''
+    const permPbMatch = /^perm:(allow|deny):([a-km-z]{5})$/i.exec(pbData)
+    if (permPbMatch) {
+      void mcp.notification({
+        method: 'notifications/claude/channel/permission',
+        params: {
+          request_id: permPbMatch[2]!.toLowerCase(),
+          behavior: permPbMatch[1]!.toLowerCase() === 'allow' ? 'allow' : 'deny',
+        },
+      })
+      // Send confirmation back to user
+      const emoji = permPbMatch[1]!.toLowerCase() === 'allow' ? '✅' : '❌'
+      const label = permPbMatch[1]!.toLowerCase() === 'allow' ? 'Allowed' : 'Denied'
+      const rt = event.replyToken
+      if (rt) {
+        void lineAPI('POST', '/v2/bot/message/reply', {
+          replyToken: rt,
+          messages: [{ type: 'text', text: `${emoji} ${label} [${permPbMatch[2]!.toLowerCase()}]` }],
+        }).catch(() => {})
+      }
+      return
+    }
+    content = `(postback: ${pbData})`
     if (event.postback?.params) meta.postback_params = JSON.stringify(event.postback.params)
   } else if (event.type === 'follow') {
     content = '(user followed the bot)'
