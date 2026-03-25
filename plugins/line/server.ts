@@ -317,6 +317,23 @@ function isMentioned(
 const replyTokenCache = new Map<string, { token: string; ts: number }>()
 const REPLY_TOKEN_TTL = 25_000
 
+// ─── Received-at cache (for response-time measurement) ────────────────────
+
+const receivedAtCache = new Map<string, number>()
+
+function storeReceivedAt(chatId: string): void {
+  receivedAtCache.set(chatId, Date.now())
+}
+
+function consumeReceivedAt(chatId: string): string {
+  const t = receivedAtCache.get(chatId)
+  if (!t) return ''
+  receivedAtCache.delete(chatId)
+  const diff = Date.now() - t
+  if (diff < 1000) return ` (${diff}ms)`
+  return ` (${(diff / 1000).toFixed(1)}s)`
+}
+
 function storeReplyToken(chatId: string, token: string): void {
   replyTokenCache.set(chatId, { token, ts: Date.now() })
 }
@@ -906,8 +923,9 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
         const messages = chunks.map(c => ({ type: 'text', text: c }))
         const { method } = await sendMessages(chat_id, messages, token)
         const qs = await quotaSuffix(method)
+        const rt = consumeReceivedAt(chat_id)
 
-        return { content: [{ type: 'text', text: `sent ${chunks.length === 1 ? '' : chunks.length + ' parts '}via ${method}${qs}` }] }
+        return { content: [{ type: 'text', text: `sent ${chunks.length === 1 ? '' : chunks.length + ' parts '}via ${method}${qs}${rt}` }] }
       }
 
       case 'push': {
@@ -928,7 +946,8 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
         }
         const sent = chunks.length === 1 ? 'sent' : `sent ${chunks.length} parts`
         const qs = await quotaSuffix('push')
-        return { content: [{ type: 'text', text: sent + qs }] }
+        const rt = consumeReceivedAt(chat_id)
+        return { content: [{ type: 'text', text: sent + qs + rt }] }
       }
 
       case 'show_loading': {
@@ -955,7 +974,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
           originalContentUrl: url,
           previewImageUrl: url,
         }], token)
-        return { content: [{ type: 'text', text: `image sent via ${method}` + await quotaSuffix(method) }] }
+        return { content: [{ type: 'text', text: `image sent via ${method}` + await quotaSuffix(method) + consumeReceivedAt(chat_id) }] }
       }
 
       case 'send_video': {
@@ -970,7 +989,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
           originalContentUrl: videoUrl,
           previewImageUrl: thumbUrl,
         }], token)
-        return { content: [{ type: 'text', text: `video sent via ${method}` + await quotaSuffix(method) }] }
+        return { content: [{ type: 'text', text: `video sent via ${method}` + await quotaSuffix(method) + consumeReceivedAt(chat_id) }] }
       }
 
       case 'send_audio': {
@@ -984,7 +1003,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
           originalContentUrl: url,
           duration,
         }], token)
-        return { content: [{ type: 'text', text: `audio sent via ${method}` + await quotaSuffix(method) }] }
+        return { content: [{ type: 'text', text: `audio sent via ${method}` + await quotaSuffix(method) + consumeReceivedAt(chat_id) }] }
       }
 
       case 'send_file': {
@@ -1020,7 +1039,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
             },
           },
         }], token)
-        return { content: [{ type: 'text', text: `file sent: ${displayName} via ${method}` + await quotaSuffix(method) }] }
+        return { content: [{ type: 'text', text: `file sent: ${displayName} via ${method}` + await quotaSuffix(method) + consumeReceivedAt(chat_id) }] }
       }
 
       case 'send_sticker': {
@@ -1032,7 +1051,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
           packageId: args.package_id as string,
           stickerId: args.sticker_id as string,
         }], token)
-        return { content: [{ type: 'text', text: `sticker sent via ${method}` + await quotaSuffix(method) }] }
+        return { content: [{ type: 'text', text: `sticker sent via ${method}` + await quotaSuffix(method) + consumeReceivedAt(chat_id) }] }
       }
 
       case 'send_location': {
@@ -1046,7 +1065,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
           latitude: Number(args.latitude),
           longitude: Number(args.longitude),
         }], token)
-        return { content: [{ type: 'text', text: `location sent via ${method}` + await quotaSuffix(method) }] }
+        return { content: [{ type: 'text', text: `location sent via ${method}` + await quotaSuffix(method) + consumeReceivedAt(chat_id) }] }
       }
 
       case 'send_flex': {
@@ -1058,7 +1077,8 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
           altText: args.alt_text as string,
           contents: args.contents,
         }], token)
-        return { content: [{ type: 'text', text: `flex sent via ${method}` + await quotaSuffix(method) }] }
+        const rt = consumeReceivedAt(chat_id)
+        return { content: [{ type: 'text', text: `flex sent via ${method}` + await quotaSuffix(method) + rt }] }
       }
 
       case 'quick_reply': {
@@ -1300,6 +1320,7 @@ async function handleEvent(event: LineEvent): Promise<void> {
   }
 
   // ── Deliver ──
+  storeReceivedAt(chatId)
   if (event.replyToken) storeReplyToken(chatId, event.replyToken)
 
   // Loading animation only works in 1-on-1 chats, not groups/rooms
