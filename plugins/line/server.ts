@@ -19,7 +19,7 @@ import {
 import { z } from 'zod'
 import { createHmac, randomBytes, timingSafeEqual } from 'crypto'
 import {
-  readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync,
+  readFileSync, writeFileSync, appendFileSync, mkdirSync, readdirSync, rmSync,
   realpathSync, renameSync, copyFileSync, existsSync, statSync,
 } from 'fs'
 import { homedir } from 'os'
@@ -1258,9 +1258,18 @@ const transport = new StdioServerTransport()
 await mcp.connect(transport)
 
 // When Claude Code session closes, stdin closes → exit cleanly to avoid orphan processes
-process.stdin.on('end', () => process.exit(0))
-process.stdin.on('close', () => process.exit(0))
-mcp.onclose = () => process.exit(0)
+const crashLog = join(STATE_DIR, 'crash.log')
+function logExit(reason: string, code: number): never {
+  const msg = `[${new Date().toISOString()}] EXIT reason=${reason} code=${code}\n`
+  try { appendFileSync(crashLog, msg) } catch {}
+  process.stderr.write(msg)
+  process.exit(code)
+}
+process.stdin.on('end', () => logExit('stdin-end', 0))
+process.stdin.on('close', () => logExit('stdin-close', 0))
+mcp.onclose = () => logExit('mcp-close', 0)
+process.on('uncaughtException', (e) => logExit(`uncaughtException: ${e}`, 1))
+process.on('unhandledRejection', (e) => logExit(`unhandledRejection: ${e}`, 1))
 
 // ─── Webhook handler ───────────────────────────────────────────────────────
 
