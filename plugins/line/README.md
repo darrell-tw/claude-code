@@ -117,10 +117,11 @@ To switch back: `/line:access set replyFormat text`
 
 ## Architecture
 
-```
-LINE App → LINE Platform → Cloudflare Tunnel → Bun HTTP (localhost:8789) → gate() → MCP notification → Claude Code
-Claude Code → MCP tool call → LINE Messaging API → LINE App
-```
+![LINE Channel Plugin architecture](docs/architecture-dark.png)
+
+**Inbound** (top row): user message arrives via LINE Platform, hits the Cloudflare Tunnel, lands at the Bun webhook server on `localhost:8789`, passes signature verification and access policy in `gate()`, then notifies Claude Code over MCP stdio.
+
+**Outbound** (bottom row): Claude calls MCP tools (`reply` / `push`), which POST to LINE's Messaging API and deliver the message to the user.
 
 ## Access Control
 

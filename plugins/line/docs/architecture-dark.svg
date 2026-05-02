@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700">
+  <style>
+    text { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace; fill: #e2e8f0; }
+    .zh { font-family: 'PingFang TC', 'Noto Sans TC', 'Hiragino Sans', sans-serif; }
+    .title { font-size: 22px; font-weight: 700; }
+    .subtitle { font-size: 12px; fill: #94a3b8; }
+    .section { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; }
+    .name { font-size: 12px; font-weight: 600; }
+    .sub { font-size: 10px; fill: #94a3b8; }
+    .legend { font-size: 11px; fill: #cbd5e1; }
+  </style>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <marker id="arr-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3b82f6"/>
+    </marker>
+    <marker id="arr-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#f97316"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="700" fill="url(#bg)"/>
+  <text x="60" y="50" class="title zh">LINE Channel Plugin 架構</text>
+  <text x="60" y="74" class="subtitle">darrell-tw/claude-code · plugins/line</text>
+  <text x="60" y="125" class="section zh" fill="#3b82f6">▸ 入站 Inbound · 使用者訊息進到 Claude</text>
+  <rect x="60" y="160" width="130" height="80" rx="6" ry="6" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+  <text x="125" y="195" text-anchor="middle" class="name">LINE App</text>
+  <text x="125" y="220" text-anchor="middle" class="sub zh">使用者手機</text>
+  <rect x="220" y="160" width="130" height="80" rx="6" ry="6" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+  <text x="285" y="195" text-anchor="middle" class="name">LINE Platform</text>
+  <text x="285" y="220" text-anchor="middle" class="sub zh">Messaging API</text>
+  <rect x="380" y="160" width="130" height="80" rx="6" ry="6" fill="#3b1f0c" stroke="#f97316" stroke-width="1.5"/>
+  <text x="445" y="195" text-anchor="middle" class="name">Cloudflare</text>
+  <text x="445" y="220" text-anchor="middle" class="sub zh">Tunnel · 公網入口</text>
+  <rect x="540" y="160" width="130" height="80" rx="6" ry="6" fill="#3f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="605" y="195" text-anchor="middle" class="name">Bun :8789</text>
+  <text x="605" y="220" text-anchor="middle" class="sub zh">localhost · webhook</text>
+  <rect x="700" y="160" width="130" height="80" rx="6" ry="6" fill="#1e1b4b" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="765" y="195" text-anchor="middle" class="name">gate()</text>
+  <text x="765" y="220" text-anchor="middle" class="sub zh">驗簽 + access</text>
+  <rect x="860" y="160" width="130" height="80" rx="6" ry="6" fill="#1e1b4b" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="925" y="195" text-anchor="middle" class="name">MCP notify</text>
+  <text x="925" y="220" text-anchor="middle" class="sub zh">JSON-RPC · stdio</text>
+  <rect x="1020" y="160" width="130" height="80" rx="6" ry="6" fill="#3a2a07" stroke="#eab308" stroke-width="1.5"/>
+  <text x="1085" y="195" text-anchor="middle" class="name">Claude Code</text>
+  <text x="1085" y="220" text-anchor="middle" class="sub zh">session 收到訊息</text>
+  <line x1="190" y1="200" x2="217" y2="200" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <line x1="350" y1="200" x2="377" y2="200" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <line x1="510" y1="200" x2="537" y2="200" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <line x1="670" y1="200" x2="697" y2="200" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <line x1="830" y1="200" x2="857" y2="200" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <line x1="990" y1="200" x2="1017" y2="200" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <text x="60" y="375" class="section zh" fill="#f97316">▸ 出站 Outbound · Claude 推訊息給使用者</text>
+  <rect x="1020" y="410" width="130" height="80" rx="6" ry="6" fill="#3a2a07" stroke="#eab308" stroke-width="1.5"/>
+  <text x="1085" y="445" text-anchor="middle" class="name">Claude Code</text>
+  <text x="1085" y="470" text-anchor="middle" class="sub zh">session 要發訊息</text>
+  <rect x="700" y="410" width="130" height="80" rx="6" ry="6" fill="#1e1b4b" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="765" y="445" text-anchor="middle" class="name">MCP tool call</text>
+  <text x="765" y="470" text-anchor="middle" class="sub zh">reply / push</text>
+  <rect x="380" y="410" width="130" height="80" rx="6" ry="6" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+  <text x="445" y="445" text-anchor="middle" class="name">LINE Messaging API</text>
+  <text x="445" y="470" text-anchor="middle" class="sub zh">POST /v2/bot/...</text>
+  <rect x="60" y="410" width="130" height="80" rx="6" ry="6" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+  <text x="125" y="445" text-anchor="middle" class="name">LINE App</text>
+  <text x="125" y="470" text-anchor="middle" class="sub zh">使用者收到訊息</text>
+  <line x1="1020" y1="450" x2="833" y2="450" stroke="#f97316" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+  <line x1="700" y1="450" x2="513" y2="450" stroke="#f97316" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+  <line x1="380" y1="450" x2="193" y2="450" stroke="#f97316" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+  <rect x="60" y="555" width="1080" height="105" rx="6" ry="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <text x="80" y="582" class="section zh" fill="#cbd5e1">Legend · 圖例</text>
+  <line x1="80" y1="608" x2="120" y2="608" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-blue)"/>
+  <text x="135" y="612" class="legend zh">入站：使用者傳訊息 → LINE Platform → Cloudflare Tunnel → 本地 webhook → 通知 Claude Code</text>
+  <line x1="80" y1="635" x2="120" y2="635" stroke="#f97316" stroke-width="2" marker-end="url(#arr-orange)"/>
+  <text x="135" y="639" class="legend zh">出站：Claude 透過 MCP tool 呼叫 LINE Messaging API → LINE Platform → 推訊息給使用者</text>
+  <text x="80" y="660" class="legend" fill="#94a3b8">公網: line-bot.darrelltw.com  ←→  本地: localhost:8789  (Cloudflare Tunnel 雙向轉發)</text>
+</svg>

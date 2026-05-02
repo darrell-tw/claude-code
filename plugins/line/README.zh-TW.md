@@ -119,10 +119,11 @@ LINE Developers Console → 你的 channel → **Messaging API**：
 
 ## 架構
 
-```
-LINE App → LINE Platform → Cloudflare Tunnel → Bun HTTP (localhost:8789) → gate() → MCP notification → Claude Code
-Claude Code → MCP tool call → LINE Messaging API → LINE App
-```
+![LINE Channel Plugin 架構](docs/architecture-dark.png)
+
+**入站（上排）**：使用者訊息透過 LINE Platform 推到 Cloudflare Tunnel，落地到本機 `localhost:8789` 的 Bun webhook server，經 `gate()` 做簽名驗證與 access 政策檢查，再以 MCP stdio 通知 Claude Code。
+
+**出站（下排）**：Claude 透過 MCP tool（`reply` / `push`）呼叫 LINE Messaging API，由 LINE Platform 推訊息給使用者。
 
 ## 存取控制
 
