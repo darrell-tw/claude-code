@@ -24,26 +24,15 @@
 
 ## 首次設定
 
+> 順序很重要：**`.env` 要在安裝 plugin 之前先寫好**。MCP server 第一次啟動時會讀 `~/.claude/channels/line/.env`，如果檔案缺漏，server 會直接 exit，後續 `/reload-plugins` 也不會重試 — 必須完整重啟 Claude Code 才能恢復。
+
 ### 1. LINE Developers Console
 
 1. 在 [LINE Developers](https://developers.line.biz/) 建立 Messaging API channel
 2. 取得 **Channel Access Token**（長效）和 **Channel Secret**
 3. 在 LINE Official Account 設定中關閉自動回覆和歡迎訊息
 
-### 2. 設定憑證
-
-```
-/line:configure <token> <secret>
-```
-
-或手動建立 `~/.claude/channels/line/.env`：
-
-```
-LINE_CHANNEL_ACCESS_TOKEN=你的-token
-LINE_CHANNEL_SECRET=你的-secret
-```
-
-### 3. 公開 URL（webhook tunnel）
+### 2. 公開 URL（webhook tunnel）
 
 你需要一個指向 `localhost:8789` 的公開 URL，例如：
 
@@ -57,24 +46,57 @@ cloudflared tunnel run line-claude
 ngrok http 8789
 ```
 
-接著：
-1. 在 `~/.claude/channels/line/.env` 加入 `LINE_PUBLIC_URL=https://mybot.example.com`
-2. 在 LINE Developers Console 設定 Webhook URL：`https://mybot.example.com/webhook`
+讓 tunnel 持續跑著。
 
-### 4. 配對帳號
+### 3. 寫入憑證
 
-1. 安裝 plugin 後啟動 Claude Code session
-2. 用 LINE 傳訊息給你的 bot
-3. Bot 回覆配對碼
-4. 在 Claude Code 中：`/line:access pair <code>`
+直接用編輯器建立 `~/.claude/channels/line/.env`：
 
-### 5. 鎖定
+```
+LINE_CHANNEL_ACCESS_TOKEN=你的-token
+LINE_CHANNEL_SECRET=你的-secret
+LINE_PUBLIC_URL=https://mybot.example.com
+```
+
+```bash
+chmod 600 ~/.claude/channels/line/.env
+```
+
+> 也有 slash command 寫法 `/line:configure <token> <secret>`，但 token 跟 secret 會留在 shell history 跟 Claude Code session transcript 裡。直接編檔比較乾淨。
+
+### 4. 在 LINE Console 設 Webhook URL
+
+LINE Developers Console → 你的 channel → **Messaging API**：
+
+- **Webhook URL**：`https://mybot.example.com/webhook`
+- **Use webhook**：開啟
+- 點 **Verify** 應該回 `Success`
+
+### 5. 安裝 plugin
+
+```
+/plugin marketplace add darrell-tw/claude-code
+/plugin install line@darrell-tw-plugins
+/reload-plugins
+```
+
+如果你照著步驟 1–3 先寫好 `.env`，這裡 `/reload-plugins` 就會把 server 啟起來。如果順序不對，要完整退出再重開 Claude Code。
+
+### 6. 配對帳號
+
+1. 用 LINE 傳訊息給你的 bot
+2. Bot 回覆 6 碼配對碼
+3. 在 Claude Code 中：`/line:access pair <code>`
+
+### 7. 鎖定
 
 所有人都配對完成後：
 
 ```
 /line:access policy allowlist
 ```
+
+之後陌生人傳訊息給 bot 會直接被 server drop，不再產生配對碼。
 
 ## 回覆格式
 

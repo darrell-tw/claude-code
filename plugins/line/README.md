@@ -22,26 +22,15 @@ A full-featured LINE Messaging API channel plugin for Claude Code — messaging 
 
 ## Setup
 
+> Set up `.env` **before** installing the plugin. The MCP server reads `~/.claude/channels/line/.env` on first spawn; if it's missing or incomplete, the server exits and won't auto-retry on later `/reload-plugins` — you'd have to fully restart Claude Code to recover.
+
 ### 1. LINE Developers Console
 
 1. Create a Messaging API channel at [LINE Developers](https://developers.line.biz/)
 2. Get your **Channel Access Token** (long-lived) and **Channel Secret**
 3. Disable auto-reply and greeting messages in LINE Official Account settings
 
-### 2. Configure credentials
-
-```
-/line:configure <token> <secret>
-```
-
-Or manually create `~/.claude/channels/line/.env`:
-
-```
-LINE_CHANNEL_ACCESS_TOKEN=your-token-here
-LINE_CHANNEL_SECRET=your-secret-here
-```
-
-### 3. Public URL (webhook tunnel)
+### 2. Public URL (webhook tunnel)
 
 You need a public URL that forwards to `localhost:8789`. Examples:
 
@@ -55,23 +44,57 @@ cloudflared tunnel run line-claude
 ngrok http 8789
 ```
 
-Then:
-1. Add `LINE_PUBLIC_URL=https://mybot.example.com` to `~/.claude/channels/line/.env`
-2. Set webhook URL in LINE Developers Console: `https://mybot.example.com/webhook`
+Keep the tunnel running.
 
-### 4. Pair your account
+### 3. Write credentials
+
+Create `~/.claude/channels/line/.env` directly with your editor:
+
+```
+LINE_CHANNEL_ACCESS_TOKEN=your-token-here
+LINE_CHANNEL_SECRET=your-secret-here
+LINE_PUBLIC_URL=https://mybot.example.com
+```
+
+```bash
+chmod 600 ~/.claude/channels/line/.env
+```
+
+> A slash command alternative `/line:configure <token> <secret>` exists but puts the credentials into your shell history and Claude Code session transcript. Editing the file directly keeps them out.
+
+### 4. Set webhook URL in LINE Console
+
+LINE Developers Console → your channel → **Messaging API**:
+
+- **Webhook URL**: `https://mybot.example.com/webhook`
+- **Use webhook**: ON
+- Click **Verify** — should return `Success`
+
+### 5. Install the plugin
+
+```
+/plugin marketplace add darrell-tw/claude-code
+/plugin install line@darrell-tw-plugins
+/reload-plugins
+```
+
+If you set up `.env` first (steps 1–3), the MCP server will spawn cleanly on `/reload-plugins`. Otherwise, fully quit and reopen Claude Code.
+
+### 6. Pair your account
 
 1. Message your bot on LINE
 2. Bot replies with a pairing code
 3. In Claude Code: `/line:access pair <code>`
 
-### 5. Lock down
+### 7. Lock down
 
 Once everyone is paired:
 
 ```
 /line:access policy allowlist
 ```
+
+This drops messages from anyone not in the allowlist, so unknown senders no longer trigger pairing codes.
 
 ## Reply Format
 

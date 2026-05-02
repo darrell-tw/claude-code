@@ -6,8 +6,10 @@ Claude Code plugin marketplace by Darrell Wang.
 
 ```
 /plugin marketplace add darrell-tw/claude-code
-/plugin install line
+/plugin install line@darrell-tw-plugins
 ```
+
+See [`plugins/line/README.md`](plugins/line/README.md) for the full setup walkthrough.
 
 ## Plugins
 
