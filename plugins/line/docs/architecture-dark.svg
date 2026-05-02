@@ -68,11 +68,10 @@
   <line x1="1020" y1="450" x2="833" y2="450" stroke="#f97316" stroke-width="1.5" marker-end="url(#arr-orange)"/>
   <line x1="700" y1="450" x2="513" y2="450" stroke="#f97316" stroke-width="1.5" marker-end="url(#arr-orange)"/>
   <line x1="380" y1="450" x2="193" y2="450" stroke="#f97316" stroke-width="1.5" marker-end="url(#arr-orange)"/>
-  <rect x="60" y="555" width="1080" height="105" rx="6" ry="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <rect x="60" y="555" width="1080" height="80" rx="6" ry="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
   <text x="80" y="582" class="section zh" fill="#cbd5e1">Legend · 圖例</text>
   <line x1="80" y1="608" x2="120" y2="608" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-blue)"/>
   <text x="135" y="612" class="legend zh">入站：使用者傳訊息 → LINE Platform → Cloudflare Tunnel → 本地 webhook → 通知 Claude Code</text>
   <line x1="80" y1="635" x2="120" y2="635" stroke="#f97316" stroke-width="2" marker-end="url(#arr-orange)"/>
   <text x="135" y="639" class="legend zh">出站：Claude 透過 MCP tool 呼叫 LINE Messaging API → LINE Platform → 推訊息給使用者</text>
-  <text x="80" y="660" class="legend" fill="#94a3b8">公網: line-bot.darrelltw.com  ←→  本地: localhost:8789  (Cloudflare Tunnel 雙向轉發)</text>
 </svg>
